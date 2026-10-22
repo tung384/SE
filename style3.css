@@ -1,0 +1,182 @@
+/* ==========================================================================
+   1. KHAI BÁO BIẾN CẤU HÌNH MÀU SẮC & NỀN TẢNG (THEME)
+   ========================================================================== */
+:root {
+  --bg: #eceef1;
+  --card: #fff;
+  --ink: #15181d;
+  --mut: #5d6570;
+  --line: #d8dce1;
+  --acc: #2f4bff;
+  --accink: #fff;
+  --ok: #0a8f4e;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Chế độ tối (Dark Mode) tự động theo hệ thống */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101216;
+    --card: #1a1d23;
+    --ink: #eef0f3;
+    --mut: #9aa3ae;
+    --line: #2b3039;
+    --acc: #6f86ff;
+    --accink: #0b0d12;
+    --ok: #3ccf86;
+  }
+}
+
+/* Chế độ tối khi chọn thủ công */
+:root[data-theme="dark"] {
+  --bg: #101216;
+  --card: #1a1d23;
+  --ink: #eef0f3;
+  --mut: #9aa3ae;
+  --line: #2b3039;
+  --acc: #6f86ff;
+  --accink: #0b0d12;
+  --ok: #3ccf86;
+}
+
+/* ==========================================================================
+   2. THIẾT LẬP CHUNG (RESET & BASE STYLES)
+   ========================================================================== */
+* { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 "Be Vietnam Pro", system-ui, sans-serif;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+/* ==========================================================================
+   3. THANH ĐẦU TRANG (HEADER) & LOGO & Ô TÌM KIẾM
+   ========================================================================== */
+header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 20px;
+}
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -.02em; }
+.logo img { width: 34px; height: 34px; border-radius: 8px; }
+.search { flex: 1; max-width: 480px; margin-left: auto; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.cartbtn { position: relative; border: 0; background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-weight: 700; }
+.cartbtn b { background: var(--acc); color: var(--accink); border-radius: 20px; padding: 1px 8px; margin-left: 6px; font-size: 13px; }
+
+/* ==========================================================================
+   4. BANNER (HERO) & THANH LỌC DANH MỤC (BAR)
+   ========================================================================== */
+.hero { padding: 44px 20px 20px; max-width: 1200px; margin: auto; }
+.hero h1 { font-size: clamp(30px, 5vw, 54px); line-height: 1.05; letter-spacing: -.035em; margin: 0 0 10px; font-weight: 800; max-width: 15ch; }
+.hero p { color: var(--mut); margin: 0; max-width: 52ch; }
+.bar { max-width: 1200px; margin: auto; padding: 12px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--card); padding: 7px 14px; border-radius: 999px; }
+.chip[aria-pressed=true] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.bar select { margin-left: auto; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+
+/* ==========================================================================
+   5. LƯỚI SẢN PHẨM (GRID & CARDS)
+   ========================================================================== */
+.grid { max-width: 1200px; margin: auto; padding: 0 20px 60px; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.card .im { border: 0; padding: 0; background: #eceef1; display: block; width: 100%; }
+.card img { width: 100%; display: block; aspect-ratio: 1; object-fit: cover; }
+.card .bd { padding: 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.brand { font-size: 13px; color: var(--mut); }
+.card h3 { margin: 0; font-size: 15px; line-height: 1.35; }
+.price { font-weight: 800; font-size: 18px; margin-top: auto; padding-top: 8px; }
+.old { color: var(--mut); text-decoration: line-through; font-size: 13px; font-weight: 400; margin-left: 6px; }
+.add { margin-top: 8px; border: 0; background: var(--acc); color: var(--accink); padding: 10px; border-radius: 10px; font-weight: 700; }
+.add:hover { filter: brightness(1.08); }
+.view { background: none; border: 0; text-align: left; padding: 0; font-weight: 700; font-size: 15px; }
+.empty { grid-column: 1/-1; text-align: center; color: var(--mut); padding: 60px 0; }
+
+/* ==========================================================================
+   6. CỬA SỔ BẬT LÊN (MODAL & OVERLAY)
+   ========================================================================== */
+.ov { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 12; display: none; align-items: center; justify-content: center; padding: 16px; }
+.ov.on { display: flex; }
+.modal { background: var(--card); border-radius: 16px; max-width: 820px; width: 100%; max-height: 92vh; overflow: auto; display: grid; grid-template-columns: 1fr 1fr; }
+.modal img { width: 100%; background: #eceef1; aspect-ratio: 1; object-fit: cover; }
+.modal .tx { padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+.modal ul { margin: 0; padding-left: 18px; color: var(--mut); }
+.x { align-self: flex-end; border: 1px solid var(--line); background: none; border-radius: 8px; padding: 4px 10px; }
+
+/* ==========================================================================
+   7. GIỎ HÀNG THU TRỢT (DRAWER)
+   ========================================================================== */
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); background: var(--card); z-index: 11; transform: translateX(105%); transition: transform .25s; display: flex; flex-direction: column; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top, 0px)); padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: -8px 0 30px rgba(0,0,0,.25); }
+.drawer.on { transform: none; }
+.items { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 12px; margin: 12px 0; }
+.it { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; }
+.it img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; }
+.it small { color: var(--mut); }
+.qty { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.qty button { width: 26px; height: 26px; border: 1px solid var(--line); background: none; border-radius: 6px; }
+.rm { border: 0; background: none; color: var(--mut); font-size: 20px; }
+.tot { display: flex; justify-content: space-between; font-weight: 800; font-size: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+.co input { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); margin-top: 8px; }
+.trk { border: 1px solid var(--line); background: none; padding: 9px 14px; border-radius: 10px; font-weight: 500; }
+
+/* ==========================================================================
+   8. TRA CỨU ĐƠN HÀNG & TRẠNG THÁI (TRACKING)
+   ========================================================================== */
+.modal.tk { display: block; padding: 22px; max-width: 640px; }
+.tk form { display: flex; gap: 8px; margin: 12px 0; }
+.tk form input { flex: 1; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.tk form button { padding: 9px 16px; border: 0; border-radius: 10px; background: var(--acc); color: var(--accink); font-weight: 700; }
+.ord { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.oh { display: flex; justify-content: space-between; align-items: center; }
+.tag { padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; background: var(--bg); }
+.s2 { color: var(--ok); }
+.s3 { color: #d6392b; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.steps li { display: flex; flex-direction: column; gap: 2px; border-top: 4px solid var(--line); padding-top: 6px; font-size: 13px; color: var(--mut); }
+.steps li.on { border-color: var(--acc); color: var(--ink); font-weight: 700; }
+.steps li.bad { border-color: #d6392b; grid-column: 1/-1; }
+.steps i { display: none; }
+.steps small { font-weight: 400; color: var(--mut); }
+.ord ul { margin: 0; padding-left: 18px; color: var(--mut); font-size: 14px; }
+.demo { border: 1px dashed var(--line); border-radius: 10px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--mut); }
+.demo button { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 10px; }
+
+/* ==========================================================================
+   9. FORM ĐĂNG NHẬP / ĐĂNG KÝ (AUTH) & TOAST
+   ========================================================================== */
+.auth { max-width: 460px; margin: 30px auto; padding: 0 20px 50px; }
+.acard { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 12px; }
+.acard h1 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+.mut { color: var(--mut); margin: 0; }
+.fl { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+.fl input { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.err { color: #d6392b; min-height: 20px; font-size: 14px; margin-bottom: 6px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 30px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 10px; opacity: 0; transition: .25s; z-index: 20; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+footer { text-align: center; color: var(--mut); padding: 30px 20px 50px; border-top: 1px solid var(--line); }
+
+/* ==========================================================================
+   10. DI ĐỘNG (RESPONSIVE)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .modal { grid-template-columns: 1fr; }
+  .search { max-width: none; min-width: 0; }
+  .logo span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

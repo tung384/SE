@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>V0 PC Store – Linh kiện máy tính</title>
+  
+  <!-- Phông chữ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- File giao diện CSS -->
+  <link rel="stylesheet" href="style3.css">
+</head>
+<body>
+
+  <!-- Thanh đầu trang (Header) -->
+  <header>
+    <div class="logo">
+      <img id="lg" alt="Logo">
+    </div>
+    <input class="search" id="q" type="search" placeholder="Tìm CPU, VGA, RAM…" aria-label="Tìm sản phẩm">
+    <button class="trk" id="tb">Đơn hàng của bạn</button>
+    <button class="trk" id="ub">Đăng nhập</button>
+    <button class="cartbtn" id="cb">Giỏ hàng<b id="cc">0</b></button>
+  </header>
+
+  <!-- Khu vực cửa hàng chính -->
+  <div id="shop">
+    <!-- Banner giới thiệu -->
+    <section class="hero">
+      <h1>Linh kiện để build bộ PC của bạn</h1>
+      <p>Chọn từng linh kiện, xem thông số và đặt hàng ngay. Hàng chính hãng, bảo hành đầy đủ.</p>
+    </section>
+
+    <!-- Thanh lọc danh mục và sắp xếp -->
+    <div class="bar" id="cats"></div>
+
+    <!-- Lưới hiển thị danh sách sản phẩm -->
+    <main class="grid" id="g"></main>
+  </div>
+
+  <!-- Khu vực Form Đăng nhập / Đăng ký (mặc định ẩn) -->
+  <section id="auth" class="auth" hidden></section>
+
+  <!-- Overlay / Modal popup (Xem chi tiết, Tra cứu đơn) -->
+  <div class="ov" id="ov"></div>
+
+  <!-- Drawer giỏ hàng trượt từ phải sang -->
+  <aside class="drawer" id="dr" aria-label="Giỏ hàng"></aside>
+
+  <!-- Thông báo Toast tạm thời -->
+  <div class="toast" id="ts"></div>
+
+  <!-- File xử lý logic JavaScript -->
+  <script src="app3.js"></script>
+
+</body>
+</html>
