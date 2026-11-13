@@ -287,7 +287,7 @@ function ordHTML(x) {
       <ol class="steps">${x.status == 3 ? `<li class="bad on"><span>Đã hủy đơn hàng</span><small>${fd(x.cancelAt)}</small></li>` : st}</ol>
       <div style="font-size:13px;color:var(--text-muted);border-top:1px solid var(--border-subtle);padding-top:8px">
         Đặt lúc: ${fd(x.log[0])} · Khách hàng: <b>${x.name}</b> (${x.phone})<br>
-        Địa chỉ giao: ${x.addr}
+        Địa chỉ giao: ${x.addr}${x.pay && payOf(x.pay) ? `<br>Thanh toán: <b>${payOf(x.pay).name}</b>` : ""}
       </div>
       <ul style="padding-left:18px;font-size:13px;color:var(--text-main);margin:4px 0">${x.items.map(i => `<li>${i.n} <b>×${i.q}</b></li>`).join("")}</ul>
       ${x.promo ? `<div class="oh" style="font-size:13px;color:var(--accent-success)"><span>Voucher áp dụng (${x.promo.code})</span><span>-${vnd(x.promo.disc)}</span></div>` : ""}
@@ -628,6 +628,56 @@ function promoList() {
 $("#pb").onclick = promoList;
 
 /* ==========================================================================
+   7C. PHƯƠNG THỨC THANH TOÁN
+   ========================================================================== */
+const PAY = [
+  { id: "cod", ico: "💵", name: "Thanh toán khi nhận hàng (COD)", desc: "Trả tiền mặt cho shipper khi nhận được hàng", note: "Bạn kiểm tra hàng rồi mới thanh toán cho nhân viên giao hàng." },
+  { id: "bank", ico: "🏦", name: "Chuyển khoản ngân hàng", desc: "Chuyển khoản trước, xác nhận nhanh trong giờ hành chính", note: "Quét mã QR bên dưới bằng app ngân hàng để chuyển khoản. Nội dung chuyển khoản: Số điện thoại + Mã đơn." },
+  { id: "card", ico: "💳", name: "Thẻ Visa / Mastercard", desc: "Thanh toán an toàn qua cổng thẻ quốc tế", note: "Vui lòng thêm thẻ của bạn trước khi tiếp tục" },
+  { id: "vnpay", ico: "📲", name: "VNPAY-QR", desc: "Quét mã QR bằng app ngân hàng bất kỳ", note: "Mã QR VNPAY sẽ được gửi sau khi xác nhận đơn hàng." },
+  { id: "momo", ico: "👛", name: "Ví MoMo", desc: "Thanh toán nhanh bằng ví điện tử MoMo", note: "Yêu cầu thanh toán MoMo sẽ được gửi tới số điện thoại của bạn." }
+];
+let payMethod = "cod";
+try { const sp = localStorage.getItem("v0pay"); if (PAY.some(m => m.id == sp)) payMethod = sp; } catch(e) {}
+const payOf = id => PAY.find(m => m.id == id);
+
+/* Mã QR chuyển khoản (TẠM THỜI): đặt ảnh QR vào ./IMG/qr-bank.png, hoặc đổi đường dẫn tại đây */
+const BANK_QR = "./IMG/qr-bank.png";
+const QR_FALLBACK = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220"><rect width="220" height="220" rx="12" fill="#fff" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 6"/><text x="110" y="104" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#475569">Chèn mã QR</text><text x="110" y="126" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#94a3b8">./IMG/qr-bank.png</text></svg>');
+
+function payNoteHTML(id) {
+  const m = payOf(id);
+  if (id == "bank") return `${m.note}<img class="pay-qr" src="${BANK_QR}" alt="Mã QR chuyển khoản ngân hàng" onerror="this.onerror=null;this.src=QR_FALLBACK">`;
+  return m.note;
+}
+
+/* Popup hỏi có muốn lưu địa chỉ vừa nhập làm địa chỉ mặc định không */
+const normAddr = s => String(s || "").trim().replace(/\s+/g, " ").toLowerCase();
+
+function askSaveAddr(addr, oldAddr, done) {
+  const o = $("#ov");
+  o.innerHTML = `
+    <div class="modal tk" style="max-width:460px" role="dialog" aria-modal="true" aria-labelledby="sat">
+      <h2 id="sat" style="font-size:20px;font-weight:800;margin-bottom:8px">Lưu địa chỉ giao hàng?</h2>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.5">Bạn có muốn đặt địa chỉ này làm <b>địa chỉ chi tiết mặc định</b> trong Trung tâm tài khoản không?</p>
+      <div class="addr-compare">
+        <div class="addr-box new"><small>Địa chỉ mới</small><span>${esc(addr)}</span></div>
+        ${oldAddr ? `<div class="addr-box"><small>Địa chỉ mặc định hiện tại</small><span>${esc(oldAddr)}</span></div>` : ""}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn-primary" id="sa1" style="flex:1;justify-content:center">Có, cập nhật</button>
+        <button class="btn-secondary" id="sa0" style="flex:1;justify-content:center">Không, giữ nguyên</button>
+      </div>
+    </div>`;
+  o.classList.add("on");
+  const fin = v => { o.classList.remove("on"); done(v); };
+  $("#sa1").onclick = () => fin(true);
+  $("#sa0").onclick = () => fin(false);
+  $("#sa1").focus();
+}
+
+/* ==========================================================================
    8. GIỎ HÀNG THƯỜNG TRỰC & THANH TOÁN (DRAWER)
    ========================================================================== */
 function drawer(msg, code) {
@@ -724,6 +774,22 @@ function drawer(msg, code) {
       <input id="nm" placeholder="Họ và tên người nhận *" value="${esc(draft.nm ?? ((AU.cur() || {}).name || ""))}">
       <input id="ph" type="tel" placeholder="Số điện thoại nhận hàng *" value="${esc(draft.ph ?? ((AU.cur() || {}).phone || ""))}">
       <input id="ad2" placeholder="Địa chỉ giao hàng chi tiết *" value="${esc(draft.ad ?? ((AU.cur() || {}).addr || ""))}">
+    </div>
+
+    <!-- Phương thức thanh toán -->
+    <div class="pay-section">
+      <div class="pay-title">Phương thức thanh toán</div>
+      <div class="pay-list" role="radiogroup" aria-label="Phương thức thanh toán">
+        ${PAY.map(m => `
+          <label class="pay-opt${m.id == payMethod ? " on" : ""}">
+            <input type="radio" name="pay" value="${m.id}"${m.id == payMethod ? " checked" : ""}>
+            <span class="pay-ico">${m.ico}</span>
+            <span class="pay-info"><b>${m.name}</b><small>${m.desc}</small></span>
+          </label>`).join("")}
+      </div>
+      <div class="pay-note${payMethod == "card" ? " warn" : ""}" id="pn">${payNoteHTML(payMethod)}</div>
+    </div>
+    <div class="checkout-form">
       <button class="btn-checkout" id="ck">Xác Nhận Đặt Hàng Ngay</button>
     </div>
   ` : `
@@ -765,10 +831,20 @@ function drawer(msg, code) {
   const gt = $("#gt");
   if (gt) gt.onclick = () => { $("#dr").classList.remove("on"); track(code); };
 
+  document.querySelectorAll('input[name="pay"]').forEach(r => r.onchange = () => {
+    payMethod = r.value;
+    try { localStorage.setItem("v0pay", payMethod); } catch(e) {}
+    document.querySelectorAll(".pay-opt").forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
+    const pn = $("#pn"); if (pn) { pn.innerHTML = payNoteHTML(payMethod); pn.classList.toggle("warn", payMethod == "card"); }
+  });
+
   const ck = $("#ck");
   if (ck) {
     ck.onclick = () => {
-      if (!AU.cur()) { needLogin(); return; }
+      const u = AU.cur();
+      if (!u) { needLogin(); return; }
+
+      if (payMethod == "card") { toast("Vui lòng thêm thẻ của bạn trước khi tiếp tục", 3000); return; }
 
       const nmEl = $("#nm"), phEl = $("#ph"), adEl = $("#ad2");
       if (!nmEl || !phEl || !adEl || !nmEl.value.trim() || !phEl.value.trim() || !adEl.value.trim()) {
@@ -776,22 +852,40 @@ function drawer(msg, code) {
         return;
       }
 
-      const od = api.create({
-        uid: AU.cur().id,
-        name: nmEl.value.trim(),
-        phone: phEl.value.trim(),
-        addr: adEl.value.trim(),
-        total: t,
-        sub: sub,
-        promo: disc ? { code: pr.code, disc: disc } : null,
-        items: ids.map(k => { const p = P.find(x => x.id == k); return { n: p.n, q: cart[k], p: p.p }; })
-      });
+      const info = { name: nmEl.value.trim(), phone: phEl.value.trim(), addr: adEl.value.trim() };
 
-      cart = {};
-      save();
-      badge();
-      setPromo(""); draft = {};
-      drawer(`Mã đơn: ${od.id}. Nhân viên sẽ liên hệ xác nhận trong vòng 15 phút.`, od.id);
+      const place = () => {
+        const od = api.create({
+          uid: u.id,
+          name: info.name,
+          phone: info.phone,
+          addr: info.addr,
+          pay: payMethod,
+          total: t,
+          sub: sub,
+          promo: disc ? { code: pr.code, disc: disc } : null,
+          items: ids.map(k => { const p = P.find(x => x.id == k); return { n: p.n, q: cart[k], p: p.p }; })
+        });
+
+        cart = {};
+        save();
+        badge();
+        setPromo(""); draft = {};
+        drawer(`Mã đơn: ${od.id}. Thanh toán: ${payOf(od.pay).name}. Nhân viên sẽ liên hệ xác nhận trong vòng 15 phút.`, od.id);
+      };
+
+      // Địa chỉ khác với địa chỉ mặc định trong tài khoản -> hỏi có muốn lưu không
+      if (normAddr(info.addr) !== normAddr(u.addr)) {
+        askSaveAddr(info.addr, u.addr || "", yes => {
+          if (yes) {
+            const us = AU.users(), me = us.find(x => x.id == u.id);
+            if (me) { me.addr = info.addr; AU.saveU(us); toast("Đã cập nhật địa chỉ mặc định trong tài khoản"); }
+          }
+          place();
+        });
+      } else {
+        place();
+      }
     };
   }
 }
